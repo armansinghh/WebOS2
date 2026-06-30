@@ -1,5 +1,11 @@
 'use client';
+
 import React from 'react';
+
+// ─── Dock ─────────────────────────────────────────────────────────────────────
+// Plain Aero taskbar strip — no glass blur, no background panel.
+// Icons are glossy gel tiles directly on the desktop, simple scale on hover,
+// no transition curves or floating labels. Clock is single-line, Vista-tray style.
 
 export default function Dock({ apps, openWindows, onOpen }) {
   function isOpen(appId) {
@@ -10,19 +16,18 @@ export default function Dock({ apps, openWindows, onOpen }) {
   }
 
   return (
-    <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50">
+    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 select-none">
       <div
-        className="flex items-end gap-2 px-5 py-3 rounded-3xl"
+        className="flex items-end gap-3 px-4 py-2 rounded-2xl"
         style={{
-          background:     'rgba(255, 255, 255, 0.20)',
-          backdropFilter: 'blur(24px) saturate(1.9) brightness(1.06)',
-          WebkitBackdropFilter: 'blur(24px) saturate(1.9) brightness(1.06)',
-          border:         '1px solid rgba(255, 255, 255, 0.42)',
+          background:           'rgba(255, 255, 255, 0.18)',
+          backdropFilter:       'blur(18px) saturate(1.7)',
+          WebkitBackdropFilter: 'blur(18px) saturate(1.7)',
+          border:               '1px solid rgba(255, 255, 255, 0.40)',
           boxShadow: `
-            inset 0 1px 1px rgba(255, 255, 255, 0.82),
-            inset 0 -1px 1px rgba(255, 255, 255, 0.12),
-            0 8px 32px 0 rgba(31, 38, 135, 0.18),
-            0 2px 8px 0 rgba(0, 0, 0, 0.20)
+            inset 0 1px 1px rgba(255, 255, 255, 0.75),
+            0 8px 24px rgba(0, 20, 50, 0.25),
+            0 2px 8px rgba(0, 0, 0, 0.18)
           `,
         }}
       >
@@ -36,14 +41,14 @@ export default function Dock({ apps, openWindows, onOpen }) {
           />
         ))}
 
-        {/* Vertical divider */}
+        {/* Plain divider — no gradient panel behind it */}
         <div style={{
-          width:        '1px',
-          height:       '42px',
-          alignSelf:    'center',
-          marginLeft:   '4px',
-          marginRight:  '4px',
-          background:   'linear-gradient(to bottom, transparent, rgba(255,255,255,0.45), transparent)',
+          width: '1px',
+          height: '40px',
+          alignSelf: 'center',
+          marginLeft: '4px',
+          marginRight: '4px',
+          background: 'rgba(255,255,255,0.35)',
         }} />
 
         <SystemClock />
@@ -52,60 +57,70 @@ export default function Dock({ apps, openWindows, onOpen }) {
   );
 }
 
-
+// ─── Single Dock Icon ─────────────────────────────────────────────────────────
 function DockIcon({ app, open, minimized, onClick }) {
+  const tileBg = app.tileBg || 'linear-gradient(180deg, #5bb4eb 0%, #178add 49%, #056bbb 50%, #004d8c 100%)';
+
   return (
     <div
-      className="flex flex-col items-center gap-0.75 cursor-pointer"
-      style={{ minWidth: '60px' }}
+      className="flex flex-col items-center cursor-pointer"
+      style={{ minWidth: '56px' }}
       onClick={onClick}
-    >      
-    <div
-        className="dock-icon relative w-14 h-14 rounded-2xl flex items-center justify-center"
+      title={app.label}
+    >
+      {/* Icon tile — glossy gel square, simple scale on hover, no easing curve gimmicks */}
+      <div
+        className="relative w-12 h-12 rounded-[10px] mt-2 flex items-center justify-center hover:scale-110"
         style={{
-          fontSize:   '2rem',
-          background: app.tileBg || 'linear-gradient(135deg, #a8e4ff 0%, #00A8E8 55%, #0055aa 100%)',
-          border:     '1px solid rgba(255, 255, 255, 0.65)',
+          fontSize: '1.7rem',
+          background: tileBg,
+          border: '1px solid rgba(0, 40, 80, 0.45)',
           boxShadow: `
-            inset 0 2px 3px rgba(255, 255, 255, 0.75),
-            inset 0 -1px 2px rgba(0, 0, 0, 0.12),
-            0 6px 16px rgba(0, 40, 100, 0.35),
-            0 2px 4px rgba(0, 0, 0, 0.20)
+            inset 0 1px 1px rgba(255, 255, 255, 0.75),
+            inset 0 -1px 2px rgba(0, 0, 0, 0.15),
+            0 3px 6px rgba(0, 0, 0, 0.30)
           `,
+          transition: 'transform 0.1s linear',
         }}
-        title={app.label}
       >
-        {/* The emoji / icon itself */}
-        <span style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.35))' }}>
-          {app.icon}
-        </span>
+        {/* Top-half gloss overlay — flat gradient, no blur */}
         <div
-          className="absolute top-0 left-0 right-0 rounded-t-2xl pointer-events-none"
+          className="absolute top-0 left-0 right-0 rounded-t-[10px] pointer-events-none"
           style={{
-            height:     '48%',
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.0) 100%)',
+            height: '48%',
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0) 100%)',
           }}
         />
+        <span className="relative" style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.40))' }}>
+          {app.icon}
+        </span>
       </div>
 
+      {/* Label — plain text, no floating tooltip */}
       <span
         style={{
-          color:      '#ffffff',
-          fontSize:   '10px',
+          color: '#ffffff',
+          fontFamily: '"Segoe UI", Tahoma, sans-serif',
+          fontSize: '10px',
           fontWeight: 600,
-          letterSpacing: '0.03em',
-          lineHeight: 1.2,
-          textShadow: '0 1px 3px rgba(0,0,0,0.65), 0 0 6px rgba(0,0,0,0.30)',
+          marginTop: '2px',
+          textShadow: '0 1px 2px rgba(0,0,0,0.75)',
         }}
       >
         {app.label}
       </span>
 
-      <div style={{ height: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {/* State LED — small flat dot, no glow */}
+      <div style={{ height: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '1px' }}>
         {(open || minimized) && (
           <div
-            className={open ? 'glow-orb' : 'glow-orb-lime'}
-            style={{ transition: 'all 0.25s ease' }}
+            style={{
+              width: '5px',
+              height: '5px',
+              borderRadius: '50%',
+              background: open ? '#40e0d0' : '#ffb800',
+              border: '1px solid rgba(0,0,0,0.25)',
+            }}
           />
         )}
       </div>
@@ -113,6 +128,7 @@ function DockIcon({ app, open, minimized, onClick }) {
   );
 }
 
+// ─── System Clock — single line, Windows XP/Vista taskbar tray style ─────────
 function SystemClock() {
   const [time, setTime] = React.useState(() => formatTime(new Date()));
 
@@ -123,30 +139,24 @@ function SystemClock() {
 
   return (
     <div
-      className="flex flex-col items-center justify-center"
-      style={{ minWidth: '54px', padding: '0 4px' }}
+      className="flex items-center justify-center"
+      style={{
+        height: '40px',
+        padding: '0 10px',
+        alignSelf: 'center',
+      }}
     >
       <span style={{
-        color:       '#ffffff',
-        fontSize:    '15px',
-        fontWeight:  700,
+        color: '#ffffff',
+        fontFamily: '"Segoe UI", Tahoma, sans-serif',
+        fontSize: '17px',
+        fontWeight: 700,
         fontVariantNumeric: 'tabular-nums',
-        lineHeight:  1.1,
-        textShadow:  '0 1px 3px rgba(0,0,0,0.55), 0 0 8px rgba(0,168,232,0.35)',
-        letterSpacing: '0.02em',
+        whiteSpace: 'nowrap',
+        textShadow: '0 1px 2px rgba(0,0,0,0.80)',
+        letterSpacing: '0.01em',
       }}>
-        {time.hhmm}
-      </span>
-      <span style={{
-        color:       'rgba(255,255,255,0.75)',
-        fontSize:    '9px',
-        fontWeight:  600,
-        letterSpacing: '0.12em',
-        textTransform: 'uppercase',
-        textShadow:  '0 1px 2px rgba(0,0,0,0.50)',
-        marginTop:   '1px',
-      }}>
-        {time.ampm}
+        {time.hhmm} {time.ampm}
       </span>
     </div>
   );
