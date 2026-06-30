@@ -1,4 +1,5 @@
 'use client';
+import React from 'react';
 
 export default function Dock({ apps, openWindows, onOpen }) {
   function isOpen(appId) {
@@ -9,13 +10,20 @@ export default function Dock({ apps, openWindows, onOpen }) {
   }
 
   return (
-    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50">
-      {/* ── Glass pill shell ── */}
+    <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50">
       <div
-        className="aero-glass flex items-end gap-3 px-5 py-3 rounded-3xl"
+        className="flex items-end gap-2 px-5 py-3 rounded-3xl"
         style={{
-          background:
-            'linear-gradient(to bottom, rgba(255,255,255,0.30) 0%, rgba(91,200,245,0.18) 100%)',
+          background:     'rgba(255, 255, 255, 0.20)',
+          backdropFilter: 'blur(24px) saturate(1.9) brightness(1.06)',
+          WebkitBackdropFilter: 'blur(24px) saturate(1.9) brightness(1.06)',
+          border:         '1px solid rgba(255, 255, 255, 0.42)',
+          boxShadow: `
+            inset 0 1px 1px rgba(255, 255, 255, 0.82),
+            inset 0 -1px 1px rgba(255, 255, 255, 0.12),
+            0 8px 32px 0 rgba(31, 38, 135, 0.18),
+            0 2px 8px 0 rgba(0, 0, 0, 0.20)
+          `,
         }}
       >
         {apps.map((app) => (
@@ -28,67 +36,79 @@ export default function Dock({ apps, openWindows, onOpen }) {
           />
         ))}
 
-        {/* Divider + System clock pill */}
-        <div className="w-px h-10 bg-white/30 mx-1 self-center rounded-full" />
+        {/* Vertical divider */}
+        <div style={{
+          width:        '1px',
+          height:       '42px',
+          alignSelf:    'center',
+          marginLeft:   '4px',
+          marginRight:  '4px',
+          background:   'linear-gradient(to bottom, transparent, rgba(255,255,255,0.45), transparent)',
+        }} />
+
         <SystemClock />
       </div>
     </div>
   );
 }
 
+
 function DockIcon({ app, open, minimized, onClick }) {
   return (
-    <div className="flex flex-col items-center gap-1 cursor-pointer" onClick={onClick}>
-      {/* Icon container */}
-      <div
-        className="dock-icon relative w-14 h-14 rounded-2xl flex items-center justify-center text-3xl"
+    <div
+      className="flex flex-col items-center gap-0.75 cursor-pointer"
+      style={{ minWidth: '60px' }}
+      onClick={onClick}
+    >      
+    <div
+        className="dock-icon relative w-14 h-14 rounded-2xl flex items-center justify-center"
         style={{
-          background: `linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(91,200,245,0.35) 100%)`,
-          border: '1px solid rgba(255,255,255,0.7)',
+          fontSize:   '2rem',
+          background: app.tileBg || 'linear-gradient(135deg, #a8e4ff 0%, #00A8E8 55%, #0055aa 100%)',
+          border:     '1px solid rgba(255, 255, 255, 0.65)',
           boxShadow: `
-            inset 0 1px 0 rgba(255,255,255,0.9),
-            inset 0 -1px 0 rgba(0,0,0,0.08),
-            0 4px 12px rgba(0,40,80,0.3)
+            inset 0 2px 3px rgba(255, 255, 255, 0.75),
+            inset 0 -1px 2px rgba(0, 0, 0, 0.12),
+            0 6px 16px rgba(0, 40, 100, 0.35),
+            0 2px 4px rgba(0, 0, 0, 0.20)
           `,
         }}
         title={app.label}
       >
-        {app.icon}
-
-        {/* Gloss reflection — top half shine */}
+        {/* The emoji / icon itself */}
+        <span style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.35))' }}>
+          {app.icon}
+        </span>
         <div
-          className="absolute top-0 left-0 right-0 h-1/2 rounded-t-2xl pointer-events-none"
+          className="absolute top-0 left-0 right-0 rounded-t-2xl pointer-events-none"
           style={{
-            background:
-              'linear-gradient(to bottom, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 100%)',
+            height:     '48%',
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.0) 100%)',
           }}
         />
       </div>
 
-      {/* App label */}
       <span
-        className="text-on-glass text-white font-medium text-[10px] leading-tight tracking-wide"
-        style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}
+        style={{
+          color:      '#ffffff',
+          fontSize:   '10px',
+          fontWeight: 600,
+          letterSpacing: '0.03em',
+          lineHeight: 1.2,
+          textShadow: '0 1px 3px rgba(0,0,0,0.65), 0 0 6px rgba(0,0,0,0.30)',
+        }}
       >
         {app.label}
       </span>
 
-      {/* Open / minimized indicator dot */}
-      <div className="h-1.5 w-1.5 rounded-full mt-0.5"
-        style={{
-          background: open
-            ? '#2ADFB8'
-            : minimized
-            ? '#8FD400'
-            : 'transparent',
-          boxShadow: open
-            ? '0 0 6px #2ADFB8'
-            : minimized
-            ? '0 0 4px #8FD400'
-            : 'none',
-          transition: 'all 0.2s',
-        }}
-      />
+      <div style={{ height: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {(open || minimized) && (
+          <div
+            className={open ? 'glow-orb' : 'glow-orb-lime'}
+            style={{ transition: 'all 0.25s ease' }}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -102,29 +122,40 @@ function SystemClock() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center px-2 min-w-[52px]">
-      <span
-        className="text-white font-semibold text-sm tabular-nums leading-tight"
-        style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}
-      >
+    <div
+      className="flex flex-col items-center justify-center"
+      style={{ minWidth: '54px', padding: '0 4px' }}
+    >
+      <span style={{
+        color:       '#ffffff',
+        fontSize:    '15px',
+        fontWeight:  700,
+        fontVariantNumeric: 'tabular-nums',
+        lineHeight:  1.1,
+        textShadow:  '0 1px 3px rgba(0,0,0,0.55), 0 0 8px rgba(0,168,232,0.35)',
+        letterSpacing: '0.02em',
+      }}>
         {time.hhmm}
       </span>
-      <span
-        className="text-white/70 font-medium text-[9px] uppercase tracking-widest"
-        style={{ textShadow: '0 1px 2px rgba(0,0,0,0.4)' }}
-      >
+      <span style={{
+        color:       'rgba(255,255,255,0.75)',
+        fontSize:    '9px',
+        fontWeight:  600,
+        letterSpacing: '0.12em',
+        textTransform: 'uppercase',
+        textShadow:  '0 1px 2px rgba(0,0,0,0.50)',
+        marginTop:   '1px',
+      }}>
         {time.ampm}
       </span>
     </div>
   );
 }
 
-import React from 'react';
-
 function formatTime(date) {
-  let hours = date.getHours();
-  const minutes = date.getMinutes().toString().padStart(2, '0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
+  let hours   = date.getHours();
+  const mins  = date.getMinutes().toString().padStart(2, '0');
+  const ampm  = hours >= 12 ? 'PM' : 'AM';
   hours = hours % 12 || 12;
-  return { hhmm: `${hours}:${minutes}`, ampm };
+  return { hhmm: `${hours}:${mins}`, ampm };
 }
