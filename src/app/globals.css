@@ -1,11 +1,5 @@
 @import "tailwindcss";
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   FRUTIGER AERO DESIGN SYSTEM — Strict Skeuomorphic / Glassmorphic Spec
-   Windows Vista/7 era · glossy · wet · dimensional · corporate optimism
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-/* ─── Design Tokens ──────────────────────────────────────────────────────── */
 :root {
   --cyan:           #00A8E8;
   --cyan-light:     #5BC8F5;
@@ -16,14 +10,6 @@
   --glass-white:    rgba(255, 255, 255, 0.20);
   --glass-border:   rgba(255, 255, 255, 0.40);
   --glass-specular: rgba(255, 255, 255, 0.80);
-
-  /*
-    THE CANONICAL AERO GLASS BOX-SHADOW
-    Layer 1 — inner top specular edge (the signature highlight)
-    Layer 2 — inner bottom subtle rim
-    Layer 3 — outer diffuse blue shadow for depth
-    Layer 4 — outer tight shadow for crispness
-  */
   --aero-shadow:
     inset 0 1px 1px rgba(255, 255, 255, 0.80),
     inset 0 -1px 1px rgba(255, 255, 255, 0.15),
@@ -45,10 +31,7 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ─── Aero Glass — the canonical container treatment ─────────────────────
-   bg-white/20 backdrop-blur-xl border border-white/40
-   shadow-[0_8px_32px_0_rgba(31,38,135,0.15),inset_0_1px_1px_rgba(255,255,255,0.8)]
-   ────────────────────────────────────────────────────────────────────────── */
+
 .aero-glass {
   background:            rgba(255, 255, 255, 0.20);
   backdrop-filter:       blur(20px) saturate(1.8) brightness(1.05);
@@ -90,9 +73,6 @@ html, body {
   border-radius: 1.25rem 1.25rem 0 0;  /* matches window top corners */
 }
 
-/* ─── Glossy Gel Button — primary ────────────────────────────────────────
-   The gel pill: aggressive gradient, punchy inner-top glow, rounded-full
-   ────────────────────────────────────────────────────────────────────────── */
 .aero-btn {
   display:          inline-flex;
   align-items:      center;

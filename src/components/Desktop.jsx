@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 import Dock from './Dock';
+import WindowManager from './WindowManager';
 
+// ─── Wallpaper config ─────────────────────────────────────────────────────────
+// Drop your 3 images into /public/wallpapers/.
+// The `src: null` custom slot will be wired to user URL input in a later phase.
 const WALLPAPERS = [
   { id: 'wp1',    src: '/wallpapers/wallpaper-1.jpg', label: 'Aurora'   },
   { id: 'wp2',    src: '/wallpapers/wallpaper-2.jpg', label: 'Meadow'   },
@@ -10,7 +14,9 @@ const WALLPAPERS = [
   { id: 'custom', src: null,                          label: 'Custom'   },
 ];
 
+// ─── Wallpaper layer ──────────────────────────────────────────────────────────
 function Wallpaper({ src }) {
+  // Fallback gradient if the custom slot has no URL yet
   if (!src) {
     return (
       <div
@@ -51,6 +57,7 @@ function Wallpaper({ src }) {
   );
 }
 
+// ─── App registry ─────────────────────────────────────────────────────────────
 const APP_REGISTRY = [
   {
     id:     'welcome',
@@ -66,11 +73,16 @@ const APP_REGISTRY = [
   },
 ];
 
+// ─── Desktop ──────────────────────────────────────────────────────────────────
 export default function Desktop() {
   const [openWindows,    setOpenWindows]    = useState([]);
+  // activeWallpaper: index into WALLPAPERS; starts on the first image
   const [wallpaperIndex, setWallpaperIndex] = useState(0);
-  // customUrl is the placeholder for the "add from link" feature
+
+  // customUrl is the placeholder for the "add from link" feature (Phase N)
   const [customUrl] = useState(null);
+
+  // Build the resolved src: use customUrl for the custom slot, otherwise the file path
   const activeWp  = WALLPAPERS[wallpaperIndex];
   const resolvedSrc = activeWp.id === 'custom' ? customUrl : activeWp.src;
 
@@ -94,21 +106,34 @@ export default function Desktop() {
     setOpenWindows((prev) => prev.map((w) => w.id === appId ? { ...w, minimized: true } : w));
   }
 
+  function updateWindowPosition(appId, newX, newY) {
+    setOpenWindows((prev) =>
+      prev.map((w) => (w.id === appId ? { ...w, x: newX, y: newY } : w))
+    );
+  }
+
   return (
     <div className="relative w-screen h-screen overflow-hidden select-none">
 
+      {/* Layer 1: Wallpaper — crossfade handled by key-driven remount */}
       <Wallpaper src={resolvedSrc} />
 
+      {/* Layer 2: Wallpaper switcher — bottom-left, small pill thumbnails */}
       <WallpaperSwitcher
         wallpapers={WALLPAPERS}
         activeIndex={wallpaperIndex}
         onSelect={setWallpaperIndex}
       />
 
-      <div className="absolute inset-0 pointer-events-none">
-        {/* WindowManager mounts here*/}
-      </div>
+      {/* Layer 3: Windows */}
+      <WindowManager
+        openWindows={openWindows}
+        onClose={closeWindow}
+        onMinimize={minimizeWindow}
+        onUpdatePosition={updateWindowPosition}
+      />
 
+      {/* Layer 4: Dock — always on top */}
       <Dock
         apps={APP_REGISTRY}
         openWindows={openWindows}
@@ -118,6 +143,9 @@ export default function Desktop() {
   );
 }
 
+// ─── WallpaperSwitcher ────────────────────────────────────────────────────────
+// Small aero-glass strip bottom-left. Thumbnail pills for the 3 presets +
+// a "+" pill for the custom URL slot (wired up in a later phase).
 function WallpaperSwitcher({ wallpapers, activeIndex, onSelect }) {
   return (
     <div
