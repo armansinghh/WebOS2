@@ -1,0 +1,142 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Dock from './Dock';
+import WindowManager from './WindowManager';
+import TopMenuBar from './TopMenuBar';
+import { GlobeIcon, ClockIcon, NotepadIcon, WeatherIcon, SettingsIcon } from '@/components/icons/AeroIcons';
+import { useContextMenu } from '@/hooks/useContextMenu';
+import ContextMenu from './ContextMenu';
+import { Monitor, Image as ImageIcon } from 'lucide-react';
+
+const WALLPAPERS = [
+  { id: 'wp1', src: '/wallpapers/wallpaper-1.jpg', label: 'Aero Theme 1 (Aurora)' },
+  { id: 'wp2', src: '/wallpapers/wallpaper-2.jpg', label: 'Aero Theme 2 (Meadow)' },
+  { id: 'wp3', src: '/wallpapers/wallpaper-3.jpg', label: 'Aero Theme 3 (Droplets)' },
+  { id: 'custom', src: null, label: 'Custom URL' },
+];
+
+const APP_REGISTRY = [
+  { id: 'welcome', label: 'Welcome', icon: <GlobeIcon size={26} />, tileBg: 'linear-gradient(135deg, #b3ecff 0%, #00A8E8 50%, #005f99 100%)' },
+  { id: 'clock', label: 'Clock', icon: <ClockIcon size={26} />, tileBg: 'linear-gradient(135deg, #d4ffb3 0%, #7CFC00 50%, #3a8800 100%)' },
+  { id: 'notepad', label: 'Notepad', icon: <NotepadIcon size={26} />, tileBg: 'linear-gradient(135deg, #ffe9b3 0%, #ffb800 50%, #a86a00 100%)' },
+  { id: 'weather', label: 'Weather', icon: <WeatherIcon size={26} />, tileBg: 'linear-gradient(135deg, #d6f0ff 0%, #5bc8f5 50%, #0077b6 100%)' },
+  { id: 'settings', label: 'Settings', icon: <SettingsIcon size={26} />, tileBg: 'linear-gradient(135deg, #e0e0e0 0%, #a6a6a6 50%, #666666 100%)' },
+];
+
+function Wallpaper({ src }) {
+  if (!src) {
+    return (
+      <div className="absolute inset-0" style={{ background: `linear-gradient(175deg, #0a2540 0%, #0d4f8c 20%, #0077b6 42%, #00b4d8 62%, #90e0ef 80%, #caf0f8 92%, #e0f7fa 100%)` }} />
+    );
+  }
+  return (
+    <div className="absolute inset-0" style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', transition: 'background-image 0.4s ease' }}>
+      <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 110% 110% at 50% 50%, transparent 35%, rgba(5, 18, 45, 0.28) 100%)` }} />
+    </div>
+  );
+}
+
+export default function Desktop() {
+  const [openWindows, setOpenWindows] = useState([]);
+  const [wallpaperIndex, setWallpaperIndex] = useState(0);
+  const [customUrl, setCustomUrl] = useState(null);
+  const [activeTitle, setActiveTitle] = useState(null);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  const { menuState, setMenuState } = useContextMenu();
+
+  useEffect(() => {
+    const savedIndex = localStorage.getItem('desktop_wallpaper_index');
+    const savedCustomUrl = localStorage.getItem('desktop_custom_wallpaper_url');
+
+    if (savedIndex !== null) setWallpaperIndex(parseInt(savedIndex, 10));
+    if (savedCustomUrl !== null) setCustomUrl(savedCustomUrl);
+    setIsHydrated(true);
+  }, []);
+
+  const handleWallpaperSelect = (index) => {
+    setWallpaperIndex(index);
+    localStorage.setItem('desktop_wallpaper_index', index.toString());
+  };
+
+  const handleCustomUrlSet = (url) => {
+    setCustomUrl(url);
+    if (url) {
+      localStorage.setItem('desktop_custom_wallpaper_url', url);
+    } else {
+      localStorage.removeItem('desktop_custom_wallpaper_url');
+    }
+  };
+
+  const activeWp = WALLPAPERS[wallpaperIndex] || WALLPAPERS[0];
+  const resolvedSrc = activeWp.id === 'custom' ? customUrl : activeWp.src;
+
+  function openApp(appId) {
+    setOpenWindows((prev) => {
+      if (prev.find((w) => w.id === appId)) {
+        return prev.map((w) => (w.id === appId ? { ...w, minimized: false } : w));
+      }
+      return [...prev, { id: appId, minimized: false, x: 120 + prev.length * 30, y: 100 + prev.length * 30 }];
+    });
+  }
+
+  function closeWindow(appId) {
+    setOpenWindows((prev) => prev.filter((w) => w.id !== appId));
+  }
+
+  function minimizeWindow(appId) {
+    setOpenWindows((prev) => prev.map((w) => (w.id === appId ? { ...w, minimized: true } : w)));
+  }
+
+  function updateWindowPosition(appId, newX, newY) {
+    setOpenWindows((prev) => prev.map((w) => (w.id === appId ? { ...w, x: newX, y: newY } : w)));
+  }
+
+  const handleContextMenu = (e) => {
+    e.preventDefault();
+    setMenuState({ isVisible: true, x: e.pageX, y: e.pageY });
+  };
+
+  const desktopMenuItems = [
+    { label: 'View', hasSubmenu: true },
+    { label: 'Sort by', hasSubmenu: true },
+    { label: 'Refresh', onClick: () => window.location.reload() },
+    { type: 'divider' },
+    { label: 'Paste', disabled: true },
+    { label: 'Paste shortcut', disabled: true },
+    { type: 'divider' },
+    { label: 'New', hasSubmenu: true },
+    { type: 'divider' },
+    { label: 'Screen resolution', icon: <Monitor size={14} color="#0058a3" /> },
+    { label: 'Gadgets' },
+    { label: 'Personalize', icon: <ImageIcon size={14} color="#0058a3" onClick={() => openApp('settings')} /> },
+  ];
+
+  return (
+    <div className="relative w-screen h-screen overflow-hidden select-none" onContextMenu={handleContextMenu}>
+      {isHydrated ? <Wallpaper src={resolvedSrc} /> : <div className="absolute inset-0 bg-[#0a2540]" />}
+
+      <TopMenuBar activeTitle={activeTitle} />
+
+      <WindowManager
+        openWindows={openWindows}
+        onClose={closeWindow}
+        onMinimize={minimizeWindow}
+        onUpdatePosition={updateWindowPosition}
+        onActiveChange={setActiveTitle}
+        wallpaperProps={{
+          wallpapers: WALLPAPERS,
+          activeIndex: wallpaperIndex,
+          customUrl: customUrl,
+          onSelect: handleWallpaperSelect,
+          onSetCustomUrl: handleCustomUrlSet
+        }}
+      />
+
+      <Dock apps={APP_REGISTRY} openWindows={openWindows} onOpen={openApp} />
+
+      <ContextMenu isVisible={menuState.isVisible} x={menuState.x} y={menuState.y} items={desktopMenuItems} />
+    </div>
+  );
+}
