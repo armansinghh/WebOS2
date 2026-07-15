@@ -6,6 +6,7 @@ import SettingsApp from '../apps/SettingsApp';
 import MediaPlayerApp from '../apps/MediaPlayerApp';
 import FileExplorerApp from '../apps/FileExplorerApp';
 import GamesApp from '../apps/GameApp';
+import BrowserApp from '../apps/BrowserApp';
 
 import { WelcomeIcon, GlobeIcon, ClockIcon, NotepadIcon, WeatherIcon, SettingsIcon, FileExplorerIcon, MediaPlayerIcon, GamesIcon } from '../icons/AeroIcons';
 
@@ -96,7 +97,7 @@ export const APP_REGISTRY = [
     tileBg: 'linear-gradient(135deg, #e0e0e0 0%, #a6a6a6 100%)',
     width: 800,
     height: 600,
-    component: () => <div className="p-4 bg-white h-full text-black">Browser coming soon...</div>,
+    component: BrowserApp,
   },
   {
     id: 'games',
