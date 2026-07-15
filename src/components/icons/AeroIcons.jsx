@@ -19,6 +19,64 @@ function IconBase({ size = 28, children, gradId, from, mid, to }) {
   );
 }
 
+function round(n) {
+  return Math.round(n * 1000) / 1000;
+}
+
+/* ---------------------------------------------------------------------
+   GlassTile: rounded-square Frutiger Aero "app tile" base — diagonal
+   saturated gradient, light-catching bevel, big specular glare sweep,
+   soft drop shadow. Used for app icons (as opposed to the round gadget
+   icons like Clock/Weather which stay circular).
+--------------------------------------------------------------------- */
+function GlassTile({ size = 28, gradId, from, mid, to, children }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id={gradId} x1="5" y1="4" x2="27" y2="29" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor={from} />
+          <stop offset="55%" stopColor={mid} />
+          <stop offset="100%" stopColor={to} />
+        </linearGradient>
+        <linearGradient id={`${gradId}-glare`} x1="6" y1="3" x2="18" y2="15" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="white" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="white" stopOpacity="0" />
+        </linearGradient>
+        <linearGradient id={`${gradId}-floor`} x1="16" y1="20" x2="16" y2="29" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="white" stopOpacity="0" />
+          <stop offset="100%" stopColor="white" stopOpacity="0.28" />
+        </linearGradient>
+        <clipPath id={`${gradId}-clip`}>
+          <rect x="2" y="2" width="28" height="28" rx="8" />
+        </clipPath>
+        <filter id={`${gradId}-shadow`} x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="1.1" stdDeviation="1" floodColor="#000" floodOpacity="0.35" />
+        </filter>
+      </defs>
+
+      <g filter={`url(#${gradId}-shadow)`}>
+        <rect x="2" y="2" width="28" height="28" rx="8" fill={`url(#${gradId})`} />
+        <rect x="2.5" y="2.5" width="27" height="27" rx="7.5"
+          stroke="rgba(255,255,255,0.55)" strokeWidth="1" fill="none" />
+        <rect x="2" y="2" width="28" height="28" rx="8"
+          stroke="rgba(0,0,0,0.25)" strokeWidth="1" fill="none" />
+      </g>
+
+      <g clipPath={`url(#${gradId}-clip)`}>
+        {/* bottom reflected light, floor-style */}
+        <rect x="2" y="20" width="28" height="9" fill={`url(#${gradId}-floor)`} />
+        {/* main glyph */}
+        {children}
+        {/* big diagonal specular glare, classic Aero glass sweep */}
+        <path d="M2 11 C 9 3, 16 2, 22 2 L 14 13 C 8 15, 4 14, 2 11 Z"
+          fill={`url(#${gradId}-glare)`} opacity="0.8" />
+        <path d="M24 2 L30 2 L30 8 C 27 6 25 4 24 2 Z"
+          fill="white" opacity="0.35" />
+      </g>
+    </svg>
+  );
+}
+
 export function GlobeIcon({ size = 28 }) {
   return (
     <IconBase size={size} gradId="globe" from="#b3ecff" mid="#00A8E8" to="#005f99">
@@ -53,10 +111,6 @@ export function ClockIcon({ size = 28 }) {
       <ellipse cx="16" cy="10" rx="11" ry="6" fill="url(#clock-gloss)" />
     </IconBase>
   );
-}
-
-function round(n) {
-  return Math.round(n * 1000) / 1000;
 }
 
 export function NotepadIcon({ size = 28 }) {
@@ -108,13 +162,91 @@ export function BatteryIcon({ size = 18, color = '#ffffff', level = 0.8 }) {
 }
 
 export function SettingsIcon({ size = 28 }) {
+  const teeth = 8;
+  const cx = 16, cy = 16;
+  const rOuterTip = 13, rOuterBase = 10.4, rInner = 6.4;
+  const toothHalfAngle = (Math.PI / teeth) * 0.32;
+
+  let d = '';
+  for (let i = 0; i < teeth; i++) {
+    const a = (i * 2 * Math.PI) / teeth;
+    const aNext = ((i + 1) * 2 * Math.PI) / teeth;
+    const mid = a + (aNext - a) / 2;
+
+    const p1 = [cx + rOuterBase * Math.sin(a), cy - rOuterBase * Math.cos(a)];
+    const p2 = [cx + rOuterBase * Math.sin(mid - toothHalfAngle), cy - rOuterBase * Math.cos(mid - toothHalfAngle)];
+    const p3 = [cx + rOuterTip * Math.sin(mid - toothHalfAngle * 0.6), cy - rOuterTip * Math.cos(mid - toothHalfAngle * 0.6)];
+    const p4 = [cx + rOuterTip * Math.sin(mid + toothHalfAngle * 0.6), cy - rOuterTip * Math.cos(mid + toothHalfAngle * 0.6)];
+    const p5 = [cx + rOuterBase * Math.sin(mid + toothHalfAngle), cy - rOuterBase * Math.cos(mid + toothHalfAngle)];
+
+    d += `${i === 0 ? 'M' : 'L'} ${round(p1[0])} ${round(p1[1])} `;
+    d += `L ${round(p2[0])} ${round(p2[1])} `;
+    d += `L ${round(p3[0])} ${round(p3[1])} `;
+    d += `L ${round(p4[0])} ${round(p4[1])} `;
+    d += `L ${round(p5[0])} ${round(p5[1])} `;
+  }
+  d += 'Z';
+
   return (
-    <IconBase size={size} gradId="settings" from="#ffffff" mid="#a0b4c8" to="#405b73">
-      <path fillRule="evenodd" clipRule="evenodd" d="M19.4 29.5c-1 .2-2.3.2-3.3 0l-.8-3.4c-1-.4-2-.9-2.8-1.5l-3.3 1.3c-1-.5-1.8-1.1-2.5-1.9l1.6-3c-.6-.7-1.1-1.6-1.5-2.6L3.5 17.5c-.3-1-.3-2.1 0-3.1l3.3-.6c.4-1 .9-1.9 1.5-2.7l-1.5-3.1c.7-.8 1.6-1.5 2.5-1.9l3.2 1.4c.9-.7 1.8-1.2 2.8-1.6l.8-3.4c1-.2 2.3-.2 3.3 0l.8 3.4c1 .4 2 .9 2.8 1.5l3.3-1.3c1 .5 1.8 1.1 2.5 1.9l-1.6 3c.6.7 1.1 1.6 1.5 2.6l3.3.9c.3 1 .3 2.1 0 3.1l-3.3.6c-.4 1-.9 1.9-1.5 2.7l1.5 3.1c-.7.8-1.6 1.5-2.5 1.9l-3.2-1.4c-.9.7-1.8 1.2-2.8 1.6l-.8 3.4zm-3.4-17c-2.5 0-4.5 2-4.5 4.5s2 4.5 4.5 4.5 4.5-2 4.5-4.5-2-4.5-4.5-4.5z" fill="url(#settings)"
-        stroke="rgba(0, 30, 60, 0.6)" strokeWidth="1" />
-      <circle cx="16" cy="16" r="4.5" stroke="rgba(255, 255, 255, 0.9)" strokeWidth="1.5" fill="none" />
-      <circle cx="16" cy="16" r="11.5" stroke="rgba(255, 255, 255, 0.4)" strokeWidth="1" fill="none" strokeDasharray="2 4" />
-      <ellipse cx="16" cy="9.5" rx="10" ry="6" fill="url(#settings-gloss)" />
+    <IconBase size={size} gradId="settings" from="#eef3f8" mid="#9fb3c8" to="#3d5872">
+      <path d={d} fill="url(#settings)" stroke="rgba(20,35,55,0.5)" strokeWidth="1" strokeLinejoin="round" />
+      <circle cx={cx} cy={cy} r={rInner} fill="white" fillOpacity="0.95" stroke="rgba(20,35,55,0.35)" strokeWidth="0.8" />
+      <circle cx={cx} cy={cy} r="2.6" fill="#3d5872" />
+      <ellipse cx="16" cy="9.5" rx="9.5" ry="5.5" fill="url(#settings-gloss)" />
     </IconBase>
+  );
+}
+
+export function MediaPlayerIcon({ size = 28 }) {
+  return (
+    <IconBase size={size} gradId="media" from="#f1e0ff" mid="#a855f7" to="#5b21b6">
+      <circle cx="16" cy="16" r="13" fill="url(#media)" stroke="rgba(45,10,80,0.45)" strokeWidth="1" />
+      <circle cx="16" cy="16" r="9.5" fill="white" fillOpacity="0.92" stroke="rgba(45,10,80,0.2)" strokeWidth="0.5" />
+      <path d="M13.3 12.2c0-.9.95-1.45 1.7-.98l6 3.8c.7.45.7 1.5 0 1.95l-6 3.8c-.75.47-1.7-.08-1.7-.98z"
+        fill="#7c1fd6" />
+      <circle cx="16" cy="16" r="1.4" fill="white" />
+      <ellipse cx="16" cy="9.5" rx="10" ry="5.5" fill="url(#media-gloss)" />
+    </IconBase>
+  );
+}
+
+export function WelcomeIcon({ size = 28 }) {
+  return (
+    <GlassTile size={size} gradId="welcome" from="#dff3ff" mid="#4fb8e8" to="#0a5f8f">
+      <path d="M 8 24 V 12 A 8 8 0 0 1 24 12 V 24 Z" fill="white" opacity="0.3" />
+      <path d="M 12 24 V 14 A 4 4 0 0 1 20 14 V 24 Z" fill="#ffd23f" />
+      <line x1="4" y1="24" x2="28" y2="24" stroke="white"strokeWidth="2" strokeLinecap="round" />
+    </GlassTile>
+  );
+}
+
+export function FileExplorerIcon({ size = 28 }) {
+  return (
+    <GlassTile size={size} gradId="files" from="#eaf2ff" mid="#5c8fe0" to="#173b78">
+      <rect x="15.5" y="6" width="9.5" height="12" rx="1" fill="white" fillOpacity="0.95"
+        stroke="rgba(10,30,70,0.3)" strokeWidth="0.5" />
+      <line x1="17.5" y1="9" x2="23" y2="9" stroke="#8fb0e6" strokeWidth="1" />
+      <line x1="17.5" y1="11.5" x2="23" y2="11.5" stroke="#8fb0e6" strokeWidth="1" />
+      <line x1="17.5" y1="14" x2="21" y2="14" stroke="#8fb0e6" strokeWidth="1" />
+      <path d="M5.5 14V11a1.4 1.4 0 0 1 1.4-1.4h5l1.7 1.9h9.4A1.4 1.4 0 0 1 24.4 13v1z"
+        fill="#bcd4ff" stroke="rgba(10,30,70,0.35)" strokeWidth="0.6" />
+      <path d="M4.8 15h22.4l-1.9 10.8a1.7 1.7 0 0 1-1.7 1.4H8.4a1.7 1.7 0 0 1-1.7-1.4z"
+        fill="white" fillOpacity="0.97" stroke="rgba(10,30,70,0.4)" strokeWidth="0.7" />
+      <path d="M4.8 15h22.4l-0.35 2H5.15z" fill="#4a75c9" opacity="0.5" />
+      <rect x="14.3" y="13.6" width="3.4" height="7.5" rx="1.2" fill="#dbe6f5"
+        stroke="rgba(10,30,70,0.4)" strokeWidth="0.5" />
+      <line x1="16" y1="14.6" x2="16" y2="20.2" stroke="rgba(10,30,70,0.25)" strokeWidth="0.5" />
+    </GlassTile>
+  );
+}
+
+export function GamesIcon({ size = 28 }) {
+  return (
+    <GlassTile size={size} gradId="games" from="#ece3ff" mid="#8b5cf6" to="#3b1e8f">
+      <rect x="6" y="10" width="20" height="12" rx="4" fill="#20123f" />
+      <path d="M9 18h4 M11 16v4" stroke="#7ee8ff" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="19" cy="18" r="1.5" fill="#ff5fa8" />
+      <circle cx="22" cy="16" r="1.5" fill="#5fffb0" />
+    </GlassTile>
   );
 }

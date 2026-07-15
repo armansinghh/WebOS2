@@ -7,16 +7,15 @@ import MediaPlayerApp from '../apps/MediaPlayerApp';
 import FileExplorerApp from '../apps/FileExplorerApp';
 import GamesApp from '../apps/GameApp';
 
-import { GlobeIcon, ClockIcon, NotepadIcon, WeatherIcon, SettingsIcon } from '../icons/AeroIcons';
-import { Disc, FolderOpen, Globe, Gamepad2 } from 'lucide-react';
+import { WelcomeIcon, GlobeIcon, ClockIcon, NotepadIcon, WeatherIcon, SettingsIcon, FileExplorerIcon, MediaPlayerIcon, GamesIcon } from '../icons/AeroIcons';
 
 export const APP_REGISTRY = [
   {
     id: 'welcome',
     title: 'Welcome',
     label: 'Welcome',
-    icon: <GlobeIcon size={26} />,
-    smallIcon: <GlobeIcon size={15} />,
+    icon: <WelcomeIcon size={26} />,
+    smallIcon: <WelcomeIcon size={15} />,
     tileBg: 'linear-gradient(135deg, #b3ecff 0%, #00A8E8 50%, #005f99 100%)',
     width: 500,
     height: 380,
@@ -68,10 +67,10 @@ export const APP_REGISTRY = [
   },
   {
     id: 'explorer',
-    title: 'Libraries',
+    title: 'File Explorer',
     label: 'File Explorer',
-    icon: <FolderOpen size={24} color="#ffcc00" fill="#ffeaa7" />,
-    smallIcon: <FolderOpen size={15} color="#ffb800" />,
+    icon: <FileExplorerIcon size={26} />,
+    smallIcon: <FileExplorerIcon size={15} />,
     tileBg: 'linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%)',
     width: 700,
     height: 500,
@@ -81,8 +80,8 @@ export const APP_REGISTRY = [
     id: 'media',
     title: 'Media Player',
     label: 'Media Player',
-    icon: <Disc size={26} color="#0ea5e9" />,
-    smallIcon: <Disc size={15} color="#0ea5e9" />,
+    icon: <MediaPlayerIcon size={26} />,
+    smallIcon: <MediaPlayerIcon size={15} />,
     tileBg: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
     width: 650,
     height: 450,
@@ -90,10 +89,10 @@ export const APP_REGISTRY = [
   },
   {
     id: 'browser',
-    title: 'Aero Explorer',
+    title: 'Web Browser',
     label: 'Web Browser',
-    icon: <Globe size={26} color="#0058a3" />,
-    smallIcon: <Globe size={15} color="#0058a3" />,
+    icon: <GlobeIcon size={26} />,
+    smallIcon: <GlobeIcon size={15} />,
     tileBg: 'linear-gradient(135deg, #e0e0e0 0%, #a6a6a6 100%)',
     width: 800,
     height: 600,
@@ -101,10 +100,10 @@ export const APP_REGISTRY = [
   },
   {
     id: 'games',
-    title: 'Games Explorer',
+    title: 'Games',
     label: 'Games',
-    icon: <Gamepad2 size={26} color="#22c55e" />,
-    smallIcon: <Gamepad2 size={15} color="#22c55e" />,
+    icon: <GamesIcon size={26} />,
+    smallIcon: <GamesIcon size={15} />,
     tileBg: 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)',
     width: 800,
     height: 500,
