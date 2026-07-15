@@ -1,14 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { Monitor, Volume2, Paintbrush, Wifi, Info, User } from 'lucide-react';
+import { Monitor, Volume2, Paintbrush, Wifi, Info, User, HardDrive, ShieldCheck, Lock, ChevronRight, CheckCircle2, Volume1 } from 'lucide-react';
+import { useNetworkState } from '../../hooks/useNetworkState';
+
+function SectionHeader({ title }) {
+    return (
+        <div className="mb-4">
+            <h2 style={{ fontFamily: '"Segoe UI", Tahoma, sans-serif', fontSize: '18px', color: '#003399', fontWeight: 400 }}>
+                {title}
+            </h2>
+            <div style={{ height: '1px', background: 'linear-gradient(to right, #003399 0%, transparent 100%)', marginTop: '2px', opacity: 0.3 }} />
+        </div>
+    );
+}
 
 export default function SettingsApp({ wallpaperProps }) {
     const [activeTab, setActiveTab] = useState('personalization');
-
-    // Custom URL states for the personalization tab
     const [inputUrl, setInputUrl] = useState('');
     const [status, setStatus] = useState('');
+    const [volume, setVolume] = useState(68);
+    const [networkState, updateNetworkState] = useNetworkState();
+    const [selectedAccount] = useState('guest');
+
+    const { wifiEnabled, airplaneMode } = networkState;
 
     const { wallpapers, activeIndex, customUrl, onSelect, onSetCustomUrl } = wallpaperProps || {};
 
@@ -19,15 +34,6 @@ export default function SettingsApp({ wallpaperProps }) {
         { id: 'accounts', label: 'User Accounts', icon: <User size={16} /> },
         { id: 'about', label: 'About AeroOS', icon: <Info size={16} /> },
     ];
-
-    const SectionHeader = ({ title }) => (
-        <div className="mb-4">
-            <h2 style={{ fontFamily: '"Segoe UI", Tahoma, sans-serif', fontSize: '18px', color: '#003399', fontWeight: 400 }}>
-                {title}
-            </h2>
-            <div style={{ height: '1px', background: 'linear-gradient(to right, #003399 0%, transparent 100%)', marginTop: '2px', opacity: 0.3 }} />
-        </div>
-    );
 
     function validateAndApply(e) {
         e.preventDefault();
@@ -54,7 +60,7 @@ export default function SettingsApp({ wallpaperProps }) {
 
             {/* Left Sidebar */}
             <div className="w-48 flex flex-col py-4 border-r border-[#d4d4d4]" style={{ background: 'linear-gradient(to right, #f0f4f9 0%, #e3eaf3 100%)', boxShadow: 'inset -1px 0 0 #ffffff' }}>
-                <div className="px-4 mb-4"><span className="font-bold text-gray-800 text-[13px]">Control Panel</span></div>
+                {/* <div className="px-4 mb-4"><span className="font-bold text-gray-800 text-[13px]">Control Panel</span></div> */}
                 <div className="flex flex-col">
                     {tabs.map((tab) => (
                         <button
@@ -141,24 +147,162 @@ export default function SettingsApp({ wallpaperProps }) {
                 )}
                 {activeTab === 'system' && (
                     <div className="flex flex-col animate-in fade-in duration-200">
-                        <SectionHeader title="Adjust system volume" />
-                        <div className="flex items-center gap-4 mt-4 px-4 py-6 bg-[#f8fafd] border border-[#e0e0e0] rounded-xs">
-                            <Volume2 size={24} color="#0058a3" />
-                            <input type="range" className="w-64 cursor-pointer" />
+                        <SectionHeader title="System settings" />
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="rounded border border-[#e0e0e0] bg-[#f8fafd] p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <Volume2 size={18} color="#0058a3" />
+                                    <span className="font-semibold text-gray-800">Master Sound</span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Volume1 size={16} color="#666" />
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        value={volume}
+                                        onChange={(e) => setVolume(Number(e.target.value))}
+                                        className="w-full cursor-pointer"
+                                    />
+                                    <span className="text-[11px] text-gray-700 w-10">{volume}%</span>
+                                </div>
+                            </div>
+
+                            <div className="rounded border border-[#e0e0e0] bg-[#f8fafd] p-4">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <HardDrive size={18} color="#0058a3" />
+                                    <span className="font-semibold text-gray-800">Storage</span>
+                                </div>
+                                <p className="text-sm text-gray-700">Available space: 412 GB of 512 GB</p>
+                                <div className="mt-3 h-2 rounded bg-[#e0e0e0] overflow-hidden">
+                                    <div className="h-full rounded bg-[#0058a3]" style={{ width: '80%' }} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 rounded border border-[#e0e0e0] p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                                <ShieldCheck size={18} color="#0058a3" />
+                                <span className="font-semibold text-gray-800">Security</span>
+                            </div>
+                            <p className="text-sm text-gray-600">Device encryption and browser-based sign-in protections are enabled for this desktop session.</p>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'network' && (
+                    <div className="flex flex-col animate-in fade-in duration-200">
+                        <SectionHeader title="Network & Internet" />
+                        <div className="rounded border border-[#e0e0e0] bg-[#f8fafd] p-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <Wifi size={18} color="#0058a3" />
+                                    <div>
+                                        <div className="font-semibold text-gray-800">Wi-Fi</div>
+                                        <div className="text-sm text-gray-500">
+                                            {airplaneMode ? 'Airplane mode enabled' : wifiEnabled ? 'Connected to Aero_Network_5G' : 'Disabled'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => updateNetworkState({ wifiEnabled: airplaneMode ? false : !wifiEnabled })}
+                                    className="px-3 py-1 border border-[#707070] bg-white text-gray-800 rounded-xs hover:bg-[#e5f1fb]"
+                                >
+                                    {airplaneMode ? 'Off' : wifiEnabled ? 'On' : 'Off'}
+                                </button>
+                            </div>
+                            <div className="mt-3 flex flex-wrap gap-2 text-[11px] text-gray-700">
+                                <span className="rounded bg-[#e8f3ff] px-2 py-1">IP: 192.168.1.42</span>
+                                <span className="rounded bg-[#f0f0f0] px-2 py-1">DNS: 8.8.8.8</span>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 rounded border border-[#e0e0e0] p-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Lock size={16} color="#666" />
+                                    <span className="font-semibold text-gray-800">Airplane mode</span>
+                                </div>
+                                <button
+                                    onClick={() => updateNetworkState({ airplaneMode: !airplaneMode, wifiEnabled: !airplaneMode ? false : wifiEnabled })}
+                                    className="px-3 py-1 border border-[#707070] bg-white text-gray-800 rounded-xs hover:bg-[#e5f1fb]"
+                                >
+                                    {airplaneMode ? 'On' : 'Off'}
+                                </button>
+                            </div>
+                            <p className="mt-2 text-sm text-gray-600">Turning this on disables Wi-Fi and shows the same state in the flyout.</p>
+                        </div>
+
+                        <div className="mt-4 rounded border border-[#e0e0e0] p-4">
+                            <div className="mb-2 text-sm font-semibold text-gray-800">Available networks</div>
+                            <div className="flex flex-col gap-2">
+                                {['Guest_WIFI', 'Home_Net_2.4'].map((network) => (
+                                    <div key={network} className="flex items-center justify-between rounded bg-[#fafafa] px-3 py-2">
+                                        <span className="text-sm text-gray-700">{network}</span>
+                                        <ChevronRight size={14} color="#666" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'accounts' && (
+                    <div className="flex flex-col animate-in fade-in duration-200">
+                        <SectionHeader title="Manage your account" />
+                        <div className="rounded border border-[#e0e0e0] bg-[#f8fafd] p-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#6b7280] text-white font-bold">G</div>
+                                    <div>
+                                        <div className="font-semibold text-gray-800">Guest User</div>
+                                        <div className="text-sm text-gray-500">Guest • Last sign in Today</div>
+                                    </div>
+                                </div>
+                                <button className="px-3 py-1 border border-[#707070] bg-white text-gray-800 rounded-xs opacity-50 cursor-not-allowed">
+                                    Manage
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 grid gap-3 md:grid-cols-2">
+                            {[
+                                { id: 'guest', title: 'Guest', desc: 'Limited access for quick demos and shared sessions.' },
+                                { id: 'admin', title: 'Administrator', desc: 'Full access to apps, settings, and system controls.' },
+                            ].map((account) => {
+                                const isSelected = selectedAccount === account.id;
+                                const isGuest = account.id === 'guest';
+                                return (
+                                    <button
+                                        key={account.id}
+                                        disabled={!isGuest}
+                                        className={`rounded border p-3 text-left ${isSelected ? 'border-[#0058a3] bg-[#eef6ff]' : 'border-[#e0e0e0] bg-white'} ${!isGuest ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <User size={16} color={isSelected ? '#0058a3' : '#666'} />
+                                                <span className={`font-semibold ${isGuest ? 'text-gray-800' : 'text-gray-500'}`}>{account.title}</span>
+                                            </div>
+                                            {isSelected && <CheckCircle2 size={16} color="#0058a3" />}
+                                        </div>
+                                        <p className={`mt-2 text-sm ${isGuest ? 'text-gray-600' : 'text-gray-400'}`}>{account.desc}</p>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 )}
 
                 {activeTab === 'about' && (
                     <div className="flex flex-col animate-in fade-in duration-200">
+                        <SectionHeader title="System Information" />
                         <div className="flex items-center gap-4 mb-6">
                             <Monitor size={48} color="#0058a3" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }} />
                             <div>
                                 <h1 className="text-2xl font-bold text-gray-800" style={{ fontFamily: '"Segoe UI", sans-serif' }}>AeroOS</h1>
-                                <p className="text-gray-500">Version 1.0 (Build 7601: Service Pack 1)</p>
+                                <p className="text-gray-500">Version 2.0 (Build 7601: Service Pack 1)</p>
                             </div>
                         </div>
-                        <SectionHeader title="System Information" />
                         <table className="w-full text-left mt-2 border-collapse">
                             <tbody>
                                 <tr className="border-b border-gray-100"><th className="py-2 font-normal text-gray-500 w-32">Processor:</th><td className="py-2 text-gray-800">WebOS Virtual CPU @ 3.40GHz</td></tr>

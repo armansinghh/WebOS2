@@ -24,7 +24,7 @@ function Wallpaper({ src }) {
     );
   }
   return (
-    <div className="absolute inset-0" style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', transition: 'background-image 0.4s ease' }}>
+    <div className="absolute inset-0" style={{ backgroundImage: `url(${src})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
       <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 110% 110% at 50% 50%, transparent 35%, rgba(5, 18, 45, 0.28) 100%)` }} />
     </div>
   );

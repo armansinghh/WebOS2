@@ -1,8 +1,12 @@
 'use client';
 import { Wifi, Lock } from 'lucide-react';
 import FlyoutShell, { FlyoutDivider, FlyoutFooterLink } from './FlyoutShell';
+import { useNetworkState } from '../../hooks/useNetworkState';
 
 export default function WifiFlyout({ isOpen }) {
+  const [networkState] = useNetworkState();
+  const { wifiEnabled, airplaneMode } = networkState;
+
   if (!isOpen) return null;
 
   const networks = [
@@ -18,12 +22,12 @@ export default function WifiFlyout({ isOpen }) {
           <span className="px-2 py-1 text-[11px] font-bold text-gray-800">Currently connected to:</span>
           <div className="flex items-center justify-between p-2 mx-1 border border-[#a6d8ff] bg-[#e5f3ff] rounded-xs">
             <div className="flex flex-col">
-              <span className="text-[12px] font-bold text-gray-900">{networks[0].name}</span>
-              <span className="text-[11px] text-gray-600">Internet access</span>
+              <span className="text-[12px] font-bold text-gray-900">{wifiEnabled && !airplaneMode ? networks[0].name : 'Wi-Fi Off'}</span>
+              <span className="text-[11px] text-gray-600">{wifiEnabled && !airplaneMode ? 'Internet access' : airplaneMode ? 'Airplane mode enabled' : 'Disabled'}</span>
             </div>
             <div className="flex items-center gap-1">
-              {networks[0].secured && <Lock size={12} color="#555" />}
-              <Wifi size={18} color="#18b518" strokeWidth={2.5} />
+              {wifiEnabled && !airplaneMode && networks[0].secured && <Lock size={12} color="#555" />}
+              <Wifi size={18} color={wifiEnabled && !airplaneMode ? '#18b518' : '#999'} strokeWidth={2.5} />
             </div>
           </div>
         </div>
